@@ -46,3 +46,8 @@
   font-size: 0.95rem;
   margin-top: 8px;
 }
+
+@media (max-width: 480px) {
+  .minister-card { width: 140px; }
+  .minister-photo-wrap { width: 140px; height: 170px; }
+}

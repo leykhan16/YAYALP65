@@ -44,3 +44,16 @@
 
 .family-drilldown { margin-top: 28px; padding-top: 20px; border-top: 1px solid #e4dcc6; }
 .form-error { color: #b3492d; font-weight: 600; margin-bottom: 12px; font-size: 0.9rem; }
+
+@media (max-width: 700px) {
+  .admin-header { padding: 14px 16px; }
+  .admin-tabs { padding: 12px 16px 0; overflow-x: auto; flex-wrap: nowrap; }
+  .admin-tabs button { flex-shrink: 0; padding: 8px 12px; font-size: 0.9rem; }
+  .admin-content { padding: 18px 14px; }
+  .stats-strip { gap: 0; }
+  .stat { padding: 10px 16px; border-left: none; border-top: 1px solid #e4dcc6; width: 50%; }
+  .stat:first-child, .stat:nth-child(2) { border-top: none; }
+  .admin-manual-form, .admin-toolbar { flex-direction: column; align-items: stretch; }
+  .admin-manual-form input, .admin-toolbar input { min-width: 0; }
+  .admin-table { font-size: 0.8rem; min-width: 600px; }
+}

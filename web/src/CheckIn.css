@@ -25,3 +25,8 @@
 .checkin-result p { font-size: 1.05rem; color: var(--navy-900); margin-bottom: 22px; line-height: 1.5; }
 .checkin-result.error p { color: #b3492d; }
 .checkin-result.already p { color: var(--gold-600); }
+
+@media (max-width: 400px) {
+  .checkin-card { padding: 32px 22px; }
+  .checkin-card h1 { font-size: 1.5rem; }
+}

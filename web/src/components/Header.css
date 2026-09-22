@@ -23,3 +23,9 @@
 .site-nav { display: flex; align-items: center; gap: 22px; }
 .site-nav a { color: var(--cream); text-decoration: none; font-weight: 600; font-size: 0.95rem; }
 .nav-cta { padding: 9px 20px !important; font-size: 0.9rem !important; }
+
+@media (max-width: 400px) {
+  .site-nav { gap: 10px; }
+  .site-nav a { display: none; }
+  .nav-cta { padding: 8px 16px !important; font-size: 0.85rem !important; }
+}

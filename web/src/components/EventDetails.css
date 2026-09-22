@@ -21,3 +21,8 @@
   margin-bottom: 4px;
 }
 .detail-card p { color: #4a5266; line-height: 1.5; font-size: 0.96rem; }
+
+@media (max-width: 480px) {
+  .details-section { padding: 60px 0; }
+  .detail-card { gap: 12px; padding: 18px 0; }
+}

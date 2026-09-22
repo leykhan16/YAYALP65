@@ -65,3 +65,8 @@
 }
 .field select:focus { outline: 2px solid var(--gold-400); border-color: transparent; }
 .form-error { color: #b3492d; font-weight: 600; margin-bottom: 12px; font-size: 0.9rem; }
+
+@media (max-width: 480px) {
+  .modal-card { padding: 24px 18px; border-radius: 14px; max-height: 92vh; }
+  .modal-title { font-size: 1.5rem; }
+}

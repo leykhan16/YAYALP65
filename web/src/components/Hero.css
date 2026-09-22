@@ -101,3 +101,12 @@
 .hero-cta-row { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
 .hero-link { color: var(--gold-300); font-weight: 600; text-decoration: none; font-size: 0.95rem; }
 .hero-link:hover { text-decoration: underline; }
+
+@media (max-width: 480px) {
+  .hero { padding-top: 76px; }
+  .hero-title { font-size: 2.4rem; }
+  .hero-verse { font-size: 0.92rem; }
+  .tilt-card { max-width: 100%; }
+  .hero-cta-row { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .hero-cta { width: 100%; text-align: center; }
+}
