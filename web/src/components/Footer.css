@@ -1,0 +1,6 @@
+.site-footer { background: var(--navy-900); padding: 50px 0 40px; text-align: center; }
+.footer-logos { display: flex; justify-content: center; gap: 16px; margin-bottom: 18px; }
+.footer-logos img { height: 54px; width: auto; border-radius: 8px; background: #fff; padding: 3px; }
+.footer-org { color: var(--cream); font-size: 0.95rem; margin-bottom: 6px; }
+.footer-handle { color: var(--gold-300); font-size: 0.85rem; }
+.footer-cta { margin-top: 22px; }

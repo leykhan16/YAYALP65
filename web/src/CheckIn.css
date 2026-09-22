@@ -1,0 +1,27 @@
+.checkin-page {
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #0a1226, #142a5e 60%, #3f7fc1);
+  padding: 24px;
+}
+.checkin-card {
+  background: var(--cream);
+  border-radius: 20px;
+  padding: 40px 32px;
+  width: 100%; max-width: 400px;
+  text-align: center;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+}
+.checkin-card h1 { font-family: var(--font-display); color: var(--navy-900); font-size: 1.8rem; }
+.checkin-sub { color: var(--gold-600); font-weight: 700; margin-bottom: 24px; }
+.checkin-card label { display: block; text-align: left; font-weight: 600; font-size: 0.9rem; color: var(--navy-900); margin-bottom: 18px; }
+.checkin-card input {
+  width: 100%; margin-top: 8px;
+  border: 1px solid #d8cfb4; border-radius: 10px;
+  padding: 12px 14px; font-size: 1.05rem; text-transform: uppercase;
+  font-family: var(--font-body);
+}
+.checkin-card .btn-gold { width: 100%; }
+.checkin-result p { font-size: 1.05rem; color: var(--navy-900); margin-bottom: 22px; line-height: 1.5; }
+.checkin-result.error p { color: #b3492d; }
+.checkin-result.already p { color: var(--gold-600); }

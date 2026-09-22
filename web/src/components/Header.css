@@ -1,0 +1,25 @@
+.site-header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 50;
+  background: rgba(10, 18, 38, 0.55);
+  backdrop-filter: blur(10px);
+  padding: 14px 0;
+}
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-logo { height: 36px; width: auto; border-radius: 6px; background: #fff; padding: 2px; }
+.brand-text {
+  color: var(--gold-300);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  display: none;
+}
+@media (min-width: 640px) { .brand-text { display: inline; } }
+.site-nav { display: flex; align-items: center; gap: 22px; }
+.site-nav a { color: var(--cream); text-decoration: none; font-weight: 600; font-size: 0.95rem; }
+.nav-cta { padding: 9px 20px !important; font-size: 0.9rem !important; }

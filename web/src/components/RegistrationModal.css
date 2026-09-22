@@ -1,0 +1,67 @@
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(10, 18, 38, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  z-index: 100;
+}
+.modal-card {
+  background: var(--cream);
+  border-radius: 20px;
+  padding: 34px;
+  width: 100%;
+  max-width: 560px;
+  max-height: 88vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 30px 70px rgba(0,0,0,0.5);
+}
+.modal-close {
+  position: absolute; top: 16px; right: 16px;
+  background: none; border: none;
+  font-size: 1.6rem; line-height: 1;
+  cursor: pointer; color: var(--navy-800);
+}
+.modal-title { margin: 6px 0 22px; }
+.reg-form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+@media (min-width: 520px) { .reg-form { grid-template-columns: 1fr 1fr; } }
+.field { display: flex; flex-direction: column; gap: 6px; font-size: 0.88rem; font-weight: 600; color: var(--navy-900); }
+.field em { color: var(--gold-600); font-style: normal; margin-left: 3px; }
+.field input {
+  border: 1px solid #d8cfb4;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  background: #fff;
+}
+.field input:focus { outline: 2px solid var(--gold-400); border-color: transparent; }
+.field-error { color: #b3492d; font-weight: 500; }
+.reg-submit { grid-column: 1 / -1; margin-top: 8px; width: 100%; }
+.reg-success { text-align: center; padding: 10px 0; }
+.reg-id-box {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  letter-spacing: 0.03em;
+  background: var(--navy-950);
+  color: var(--gold-300);
+  padding: 16px;
+  border-radius: 12px;
+  margin: 20px 0;
+}
+.reg-note { color: #4a5266; margin-bottom: 22px; line-height: 1.6; }
+.field select {
+  border: 1px solid #d8cfb4;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  background: #fff;
+}
+.field select:focus { outline: 2px solid var(--gold-400); border-color: transparent; }
+.form-error { color: #b3492d; font-weight: 600; margin-bottom: 12px; font-size: 0.9rem; }
