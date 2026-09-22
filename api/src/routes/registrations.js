@@ -17,7 +17,10 @@ router.post('/', upload.single('passport'), async (req, res) => {
   if (!/^\S+@\S+\.\S+$/.test(body.email)) {
     return res.status(400).json({ error: 'Enter a valid email address.' })
   }
-  if (req.file && !req.file.mimetype.startsWith('image/')) {
+  if (!req.file) {
+    return res.status(400).json({ error: 'A passport photograph is required.' })
+  }
+  if (!req.file.mimetype.startsWith('image/')) {
     return res.status(400).json({ error: 'Passport photo must be an image file.' })
   }
 
@@ -28,20 +31,18 @@ router.post('/', upload.single('passport'), async (req, res) => {
   }
   const registrationId = `YAYA65-26-${String(counterData).padStart(6, '0')}`
 
-  let passportUrl = null
-  if (req.file) {
-    const ext = (req.file.originalname.split('.').pop() || 'jpg').toLowerCase()
-    const filePath = `${registrationId}.${ext}`
-    const { error: uploadError } = await supabase.storage
-      .from('passports')
-      .upload(filePath, req.file.buffer, { contentType: req.file.mimetype, upsert: true })
-    if (uploadError) {
-      console.error('Passport upload failed (registration continues without it):', uploadError)
-    } else {
-      const { data: urlData } = supabase.storage.from('passports').getPublicUrl(filePath)
-      passportUrl = urlData.publicUrl
-    }
+  const ext = (req.file.originalname.split('.').pop() || 'jpg').toLowerCase()
+  const filePath = `${registrationId}.${ext}`
+  const { error: uploadError } = await supabase.storage
+    .from('passports')
+    .upload(filePath, req.file.buffer, { contentType: req.file.mimetype, upsert: true })
+
+  if (uploadError) {
+    console.error(uploadError)
+    return res.status(500).json({ error: 'Passport photo could not be uploaded. Please try again.' })
   }
+  const { data: urlData } = supabase.storage.from('passports').getPublicUrl(filePath)
+  const passportUrl = urlData.publicUrl
 
   const { data, error } = await supabase
     .from('registrations')

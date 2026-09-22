@@ -16,6 +16,7 @@ export default function RegistrationModal({ open, onClose }) {
   const [families, setFamilies] = useState([])
   const [passportFile, setPassportFile] = useState(null)
   const [passportPreview, setPassportPreview] = useState(null)
+  const [passportError, setPassportError] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [serverError, setServerError] = useState('')
   const [result, setResult] = useState(null)
@@ -36,6 +37,7 @@ export default function RegistrationModal({ open, onClose }) {
     if (!file) { setPassportFile(null); setPassportPreview(null); return }
     setPassportFile(file)
     setPassportPreview(URL.createObjectURL(file))
+    setPassportError('')
   }
 
   function validate() {
@@ -43,7 +45,9 @@ export default function RegistrationModal({ open, onClose }) {
     required.forEach((field) => { if (!form[field].trim()) errs[field] = 'Required' })
     if (form.email && !/^\S+@\S+\.\S+$/.test(form.email)) errs.email = 'Enter a valid email'
     setErrors(errs)
-    return Object.keys(errs).length === 0
+    const passportOk = !!passportFile
+    setPassportError(passportOk ? '' : 'Required')
+    return Object.keys(errs).length === 0 && passportOk
   }
 
   async function handleSubmit(e) {
@@ -63,7 +67,7 @@ export default function RegistrationModal({ open, onClose }) {
 
   function handleClose() {
     setForm(initialForm); setErrors({}); setResult(null); setServerError('')
-    setPassportFile(null); setPassportPreview(null)
+    setPassportFile(null); setPassportPreview(null); setPassportError('')
     onClose()
   }
 
@@ -112,8 +116,9 @@ export default function RegistrationModal({ open, onClose }) {
                   <Field label="Department" name="department" form={form} errors={errors} onChange={handleChange} optional />
 
                   <label className="field field-wide">
-                    <span>Passport Photograph <small className="optional-tag">(optional)</small></span>
+                    <span>Passport Photograph<em>*</em></span>
                     <input type="file" accept="image/*" onChange={handlePassportChange} />
+                    {passportError && <small className="field-error">{passportError}</small>}
                     {passportPreview && <img src={passportPreview} alt="Preview" className="passport-preview" />}
                   </label>
 
