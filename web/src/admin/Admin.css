@@ -57,3 +57,4 @@
   .admin-manual-form input, .admin-toolbar input { min-width: 0; }
   .admin-table { font-size: 0.8rem; min-width: 600px; }
 }
+.admin-thumb { width: 34px; height: 34px; border-radius: 6px; object-fit: cover; }

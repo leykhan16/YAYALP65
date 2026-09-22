@@ -5,27 +5,37 @@ import './RegistrationModal.css'
 
 const initialForm = {
   fullName: '', phone: '', whatsapp: '', email: '',
-  parish: '', area: '', zone: '', familyId: '', department: '', unit: '',
+  parish: '', area: '', zone: '', familyId: '', department: '',
+  postHeld: '', gender: '',
 }
-const required = ['fullName', 'phone', 'email', 'parish', 'area', 'zone', 'familyId', 'department']
+const required = ['fullName', 'phone', 'email', 'parish', 'area', 'zone', 'familyId', 'postHeld', 'gender']
 
 export default function RegistrationModal({ open, onClose }) {
   const [form, setForm] = useState(initialForm)
   const [errors, setErrors] = useState({})
   const [families, setFamilies] = useState([])
+  const [passportFile, setPassportFile] = useState(null)
+  const [passportPreview, setPassportPreview] = useState(null)
   const [submitting, setSubmitting] = useState(false)
   const [serverError, setServerError] = useState('')
   const [result, setResult] = useState(null)
 
   useEffect(() => {
     if (open) {
-      api.getFamilies().then(setFamilies).catch(() => setServerError('Could not load families. Is the backend running?'))
+      api.getFamilies().then(setFamilies).catch(() => setServerError('Could not load communities. Is the backend running?'))
     }
   }, [open])
 
   function handleChange(e) {
     const { name, value } = e.target
     setForm((f) => ({ ...f, [name]: value }))
+  }
+
+  function handlePassportChange(e) {
+    const file = e.target.files?.[0]
+    if (!file) { setPassportFile(null); setPassportPreview(null); return }
+    setPassportFile(file)
+    setPassportPreview(URL.createObjectURL(file))
   }
 
   function validate() {
@@ -42,7 +52,7 @@ export default function RegistrationModal({ open, onClose }) {
     if (!validate()) return
     setSubmitting(true)
     try {
-      const data = await api.register(form)
+      const data = await api.register(form, passportFile)
       setResult({ registrationId: data.registrationId, fullName: data.fullName })
     } catch (err) {
       setServerError(err.message)
@@ -53,6 +63,7 @@ export default function RegistrationModal({ open, onClose }) {
 
   function handleClose() {
     setForm(initialForm); setErrors({}); setResult(null); setServerError('')
+    setPassportFile(null); setPassportPreview(null)
     onClose()
   }
 
@@ -73,19 +84,39 @@ export default function RegistrationModal({ open, onClose }) {
                   <Field label="Phone Number" name="phone" form={form} errors={errors} onChange={handleChange} />
                   <Field label="WhatsApp Number" name="whatsapp" form={form} errors={errors} onChange={handleChange} optional />
                   <Field label="Email" name="email" type="email" form={form} errors={errors} onChange={handleChange} />
+
+                  <label className="field">
+                    <span>Gender<em>*</em></span>
+                    <select name="gender" value={form.gender} onChange={handleChange}>
+                      <option value="">Select gender</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                    </select>
+                    {errors.gender && <small className="field-error">{errors.gender}</small>}
+                  </label>
+
                   <Field label="Parish" name="parish" form={form} errors={errors} onChange={handleChange} />
                   <Field label="Area" name="area" form={form} errors={errors} onChange={handleChange} />
                   <Field label="Zone" name="zone" form={form} errors={errors} onChange={handleChange} />
+
                   <label className="field">
-                    <span>Family<em>*</em></span>
+                    <span>Community<em>*</em></span>
                     <select name="familyId" value={form.familyId} onChange={handleChange}>
-                      <option value="">Select family</option>
+                      <option value="">Select community</option>
                       {families.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
                     </select>
                     {errors.familyId && <small className="field-error">{errors.familyId}</small>}
                   </label>
-                  <Field label="Department" name="department" form={form} errors={errors} onChange={handleChange} />
-                  <Field label="Unit" name="unit" form={form} errors={errors} onChange={handleChange} optional />
+
+                  <Field label="Post Held" name="postHeld" form={form} errors={errors} onChange={handleChange} />
+                  <Field label="Department" name="department" form={form} errors={errors} onChange={handleChange} optional />
+
+                  <label className="field field-wide">
+                    <span>Passport Photograph <small className="optional-tag">(optional)</small></span>
+                    <input type="file" accept="image/*" onChange={handlePassportChange} />
+                    {passportPreview && <img src={passportPreview} alt="Preview" className="passport-preview" />}
+                  </label>
+
                   <button type="submit" className="btn-gold reg-submit" disabled={submitting}>
                     {submitting ? 'Submitting…' : 'Complete Registration'}
                   </button>
@@ -113,7 +144,7 @@ export default function RegistrationModal({ open, onClose }) {
 function Field({ label, name, type = 'text', form, errors, onChange, optional }) {
   return (
     <label className="field">
-      <span>{label}{!optional && <em>*</em>}</span>
+      <span>{label}{!optional && <em>*</em>}{optional && <small className="optional-tag">(optional)</small>}</span>
       <input type={type} name={name} value={form[name]} onChange={onChange} />
       {errors[name] && <small className="field-error">{errors[name]}</small>}
     </label>

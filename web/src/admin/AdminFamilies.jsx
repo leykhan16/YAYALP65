@@ -36,7 +36,7 @@ export default function AdminFamilies({ token, onExpired }) {
     try {
       await api.adminPost('/families', token, { name: newName, code: newCode })
       setNewName(''); setNewCode('')
-      setAddMsg('Family added.')
+      setAddMsg('Community added.')
       load()
     } catch (err) {
       setAddMsg(err.message)
@@ -46,7 +46,7 @@ export default function AdminFamilies({ token, onExpired }) {
   return (
     <div>
       <form className="admin-manual-form" onSubmit={handleAdd}>
-        <input placeholder="New family name" value={newName} onChange={(e) => setNewName(e.target.value)} />
+        <input placeholder="New community name" value={newName} onChange={(e) => setNewName(e.target.value)} />
         <input placeholder="Code (optional)" value={newCode} onChange={(e) => setNewCode(e.target.value)} />
         <button className="btn-gold" type="submit">Add Family</button>
       </form>
@@ -54,7 +54,7 @@ export default function AdminFamilies({ token, onExpired }) {
 
       <div className="admin-table-wrap">
         <table className="admin-table">
-          <thead><tr><th>Family</th><th>Registered</th><th>Present</th><th>Not Present</th><th>Rate</th></tr></thead>
+          <thead><tr><th>Community</th><th>Registered</th><th>Present</th><th>Not Present</th><th>Rate</th></tr></thead>
           <tbody>
             {families.map((f) => (
               <tr key={f.id} className="clickable" onClick={() => openFamily(f.id)}>

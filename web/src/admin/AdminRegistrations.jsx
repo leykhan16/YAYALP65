@@ -25,8 +25,8 @@ export default function AdminRegistrations({ token, onExpired }) {
 
   function exportCsv() {
     downloadCsv('registrations.csv', rows, [
-      'registrationId', 'fullName', 'phone', 'whatsapp', 'email', 'familyName',
-      'parish', 'area', 'zone', 'department', 'unit', 'attendanceStatus', 'createdAt',
+      'registrationId', 'fullName', 'gender', 'phone', 'whatsapp', 'email', 'familyName',
+      'parish', 'area', 'zone', 'postHeld', 'department', 'attendanceStatus', 'createdAt',
     ])
   }
 
@@ -39,15 +39,18 @@ export default function AdminRegistrations({ token, onExpired }) {
       <div className="admin-table-wrap">
         <table className="admin-table">
           <thead>
-            <tr><th>ID</th><th>Name</th><th>Phone</th><th>Family</th><th>Parish/Area/Zone</th><th>Status</th></tr>
+            <tr><th>Photo</th><th>ID</th><th>Name</th><th>Gender</th><th>Phone</th><th>Community</th><th>Post Held</th><th>Parish/Area/Zone</th><th>Status</th></tr>
           </thead>
           <tbody>
             {rows.map((r) => (
               <tr key={r.registrationId}>
+                <td>{r.passportUrl ? <img src={r.passportUrl} alt="" className="admin-thumb" /> : '—'}</td>
                 <td>{r.registrationId}</td>
                 <td>{r.fullName}</td>
+                <td>{r.gender}</td>
                 <td>{r.phone}</td>
                 <td>{r.familyName}</td>
+                <td>{r.postHeld}</td>
                 <td>{r.parish} / {r.area} / {r.zone}</td>
                 <td><span className={`badge ${r.attendanceStatus}`}>{r.attendanceStatus}</span></td>
               </tr>

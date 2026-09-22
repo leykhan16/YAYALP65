@@ -70,3 +70,20 @@
   .modal-card { padding: 24px 18px; border-radius: 14px; max-height: 92vh; }
   .modal-title { font-size: 1.5rem; }
 }
+.field-wide { grid-column: 1 / -1; }
+.optional-tag { color: #8a92a6; font-weight: 500; font-size: 0.78rem; margin-left: 4px; }
+.passport-preview {
+  margin-top: 10px;
+  width: 90px; height: 90px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 2px solid var(--gold-400);
+}
+input[type="file"] {
+  border: 1px dashed #d8cfb4;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  background: #fff;
+}

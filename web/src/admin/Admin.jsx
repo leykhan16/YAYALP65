@@ -6,7 +6,7 @@ import AdminAttendance from './AdminAttendance'
 import AdminFamilies from './AdminFamilies'
 import './Admin.css'
 
-const TABS = ['Overview', 'Registrations', 'Attendance', 'Families']
+const TABS = ['Overview', 'Registrations', 'Attendance', 'Communities']
 
 export default function Admin() {
   const [token, setToken] = useState(() => sessionStorage.getItem('yaya65_admin_token') || '')
@@ -60,7 +60,7 @@ export default function Admin() {
         {tab === 'Overview' && <AdminOverview token={token} onExpired={handleLogout} />}
         {tab === 'Registrations' && <AdminRegistrations token={token} onExpired={handleLogout} />}
         {tab === 'Attendance' && <AdminAttendance token={token} onExpired={handleLogout} />}
-        {tab === 'Families' && <AdminFamilies token={token} onExpired={handleLogout} />}
+        {tab === 'Communities' && <AdminFamilies token={token} onExpired={handleLogout} />}
       </main>
     </div>
   )
