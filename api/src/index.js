@@ -7,7 +7,14 @@ import attendanceRouter from './routes/attendance.js'
 import adminRouter from './routes/admin.js'
 
 const app = express()
-app.use(cors())
+
+const allowedOrigins = (process.env.CORS_ORIGIN || '*')
+  .split(',')
+  .map((s) => s.trim())
+
+app.use(cors({
+  origin: allowedOrigins.includes('*') ? true : allowedOrigins,
+}))
 app.use(express.json())
 
 app.get('/', (req, res) => res.json({ ok: true, service: 'yaya65-api' }))
@@ -17,4 +24,4 @@ app.use('/api/attendance', attendanceRouter)
 app.use('/api/admin', adminRouter)
 
 const PORT = process.env.PORT || 4000
-app.listen(PORT, () => console.log(`YAYA65 API running on http://localhost:${PORT}`))
+app.listen(PORT, () => console.log(`YAYA65 API running on port ${PORT}`))
