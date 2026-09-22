@@ -1,4 +1,3 @@
-import rccgLogo from '../assets/rccg_logo.png'
 import yayaLogo from '../assets/yaya_logo.png'
 import './Header.css'
 
@@ -7,7 +6,6 @@ export default function Header({ onRegisterClick }) {
     <header className="site-header">
       <div className="container header-inner">
         <div className="brand">
-          <img src={rccgLogo} alt="RCCG logo" className="brand-logo" />
           <img src={yayaLogo} alt="YAYA logo" className="brand-logo" />
           <span className="brand-text">Lagos Province 65 &middot; YAYA</span>
         </div>
