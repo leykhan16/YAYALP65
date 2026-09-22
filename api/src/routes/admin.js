@@ -56,7 +56,7 @@ router.get('/registrations', async (req, res) => {
     registrationId: r.registration_id, fullName: r.full_name, phone: r.phone,
     whatsapp: r.whatsapp, email: r.email, parish: r.parish, area: r.area, zone: r.zone,
     familyId: r.family_id, familyName: familyNameById[r.family_id] || 'Unassigned',
-    department: r.department, unit: r.unit, createdAt: r.created_at,
+    department: r.department, postHeld: r.post_held, gender: r.gender, passportUrl: r.passport_url, createdAt: r.created_at,
     attendanceStatus: presentIds.has(r.registration_id) ? 'present' : 'not-present',
   }))
 

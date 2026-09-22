@@ -1,11 +1,14 @@
 import { Router } from 'express'
+import multer from 'multer'
 import { supabase } from '../supabaseClient.js'
 import { sendConfirmationEmail } from '../mailer.js'
 
 const router = Router()
-const required = ['fullName', 'phone', 'email', 'parish', 'area', 'zone', 'familyId', 'department']
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } })
 
-router.post('/', async (req, res) => {
+const required = ['fullName', 'phone', 'email', 'parish', 'area', 'zone', 'familyId', 'postHeld', 'gender']
+
+router.post('/', upload.single('passport'), async (req, res) => {
   const body = req.body || {}
   const missing = required.filter((f) => !body[f] || !String(body[f]).trim())
   if (missing.length) {
@@ -14,6 +17,9 @@ router.post('/', async (req, res) => {
   if (!/^\S+@\S+\.\S+$/.test(body.email)) {
     return res.status(400).json({ error: 'Enter a valid email address.' })
   }
+  if (req.file && !req.file.mimetype.startsWith('image/')) {
+    return res.status(400).json({ error: 'Passport photo must be an image file.' })
+  }
 
   const { data: counterData, error: counterError } = await supabase.rpc('next_registration_number')
   if (counterError) {
@@ -21,6 +27,21 @@ router.post('/', async (req, res) => {
     return res.status(500).json({ error: 'Could not generate a registration ID. Please try again.' })
   }
   const registrationId = `YAYA65-26-${String(counterData).padStart(6, '0')}`
+
+  let passportUrl = null
+  if (req.file) {
+    const ext = (req.file.originalname.split('.').pop() || 'jpg').toLowerCase()
+    const filePath = `${registrationId}.${ext}`
+    const { error: uploadError } = await supabase.storage
+      .from('passports')
+      .upload(filePath, req.file.buffer, { contentType: req.file.mimetype, upsert: true })
+    if (uploadError) {
+      console.error('Passport upload failed (registration continues without it):', uploadError)
+    } else {
+      const { data: urlData } = supabase.storage.from('passports').getPublicUrl(filePath)
+      passportUrl = urlData.publicUrl
+    }
+  }
 
   const { data, error } = await supabase
     .from('registrations')
@@ -34,8 +55,10 @@ router.post('/', async (req, res) => {
       area: body.area.trim(),
       zone: body.zone.trim(),
       family_id: body.familyId,
-      department: body.department.trim(),
-      unit: body.unit?.trim() || null,
+      department: body.department?.trim() || null,
+      post_held: body.postHeld.trim(),
+      gender: body.gender.trim(),
+      passport_url: passportUrl,
     })
     .select()
     .single()
