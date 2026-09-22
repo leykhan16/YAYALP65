@@ -6,7 +6,7 @@ import { sendConfirmationEmail } from '../mailer.js'
 const router = Router()
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } })
 
-const required = ['fullName', 'phone', 'email', 'parish', 'area', 'zone', 'familyId', 'postHeld', 'gender']
+const required = ['fullName', 'phone', 'email', 'parish', 'area', 'zone', 'familyId', 'gender']
 
 router.post('/', upload.single('passport'), async (req, res) => {
   const body = req.body || {}
@@ -56,7 +56,7 @@ router.post('/', upload.single('passport'), async (req, res) => {
       zone: body.zone.trim(),
       family_id: body.familyId,
       department: body.department?.trim() || null,
-      post_held: body.postHeld.trim(),
+      post_held: body.postHeld?.trim() || null,
       gender: body.gender.trim(),
       passport_url: passportUrl,
     })

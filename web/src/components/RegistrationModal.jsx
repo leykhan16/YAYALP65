@@ -8,7 +8,7 @@ const initialForm = {
   parish: '', area: '', zone: '', familyId: '', department: '',
   postHeld: '', gender: '',
 }
-const required = ['fullName', 'phone', 'email', 'parish', 'area', 'zone', 'familyId', 'postHeld', 'gender']
+const required = ['fullName', 'phone', 'email', 'parish', 'area', 'zone', 'familyId', 'gender']
 
 export default function RegistrationModal({ open, onClose }) {
   const [form, setForm] = useState(initialForm)
@@ -108,7 +108,7 @@ export default function RegistrationModal({ open, onClose }) {
                     {errors.familyId && <small className="field-error">{errors.familyId}</small>}
                   </label>
 
-                  <Field label="Post Held" name="postHeld" form={form} errors={errors} onChange={handleChange} />
+                  <Field label="Post Held" name="postHeld" form={form} errors={errors} onChange={handleChange} optional />
                   <Field label="Department" name="department" form={form} errors={errors} onChange={handleChange} optional />
 
                   <label className="field field-wide">
