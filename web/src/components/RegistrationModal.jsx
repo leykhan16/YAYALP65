@@ -8,10 +8,11 @@ const initialForm = {
   parish: '', area: '', zone: '', familyId: '', department: '',
   postHeld: '', gender: '',
 }
-const required = ['fullName', 'phone', 'email', 'parish', 'area', 'zone', 'familyId', 'gender']
+const baseRequired = ['fullName', 'phone', 'parish', 'area', 'zone', 'familyId', 'gender']
 
 export default function RegistrationModal({ open, onClose }) {
   const [form, setForm] = useState(initialForm)
+  const [noEmail, setNoEmail] = useState(false)
   const [errors, setErrors] = useState({})
   const [families, setFamilies] = useState([])
   const [passportFile, setPassportFile] = useState(null)
@@ -42,8 +43,11 @@ export default function RegistrationModal({ open, onClose }) {
 
   function validate() {
     const errs = {}
-    required.forEach((field) => { if (!form[field].trim()) errs[field] = 'Required' })
-    if (form.email && !/^\S+@\S+\.\S+$/.test(form.email)) errs.email = 'Enter a valid email'
+    baseRequired.forEach((field) => { if (!form[field].trim()) errs[field] = 'Required' })
+    if (!noEmail) {
+      if (!form.email.trim()) errs.email = 'Required, or check "I don\'t have an email"'
+      else if (!/^\S+@\S+\.\S+$/.test(form.email)) errs.email = 'Enter a valid email'
+    }
     setErrors(errs)
     const passportOk = !!passportFile
     setPassportError(passportOk ? '' : 'Required')
@@ -56,8 +60,9 @@ export default function RegistrationModal({ open, onClose }) {
     if (!validate()) return
     setSubmitting(true)
     try {
-      const data = await api.register(form, passportFile)
-      setResult({ registrationId: data.registrationId, fullName: data.fullName })
+      const payload = { ...form, noEmail: noEmail ? 'true' : 'false' }
+      const data = await api.register(payload, passportFile)
+      setResult({ registrationId: data.registrationId, fullName: data.fullName, emailed: data.emailed })
     } catch (err) {
       setServerError(err.message)
     } finally {
@@ -66,7 +71,7 @@ export default function RegistrationModal({ open, onClose }) {
   }
 
   function handleClose() {
-    setForm(initialForm); setErrors({}); setResult(null); setServerError('')
+    setForm(initialForm); setNoEmail(false); setErrors({}); setResult(null); setServerError('')
     setPassportFile(null); setPassportPreview(null); setPassportError('')
     onClose()
   }
@@ -87,7 +92,17 @@ export default function RegistrationModal({ open, onClose }) {
                   <Field label="Full Name" name="fullName" form={form} errors={errors} onChange={handleChange} />
                   <Field label="Phone Number" name="phone" form={form} errors={errors} onChange={handleChange} />
                   <Field label="WhatsApp Number" name="whatsapp" form={form} errors={errors} onChange={handleChange} optional />
-                  <Field label="Email" name="email" type="email" form={form} errors={errors} onChange={handleChange} />
+
+                  <label className="field">
+                    <span>Email{!noEmail && <em>*</em>}</span>
+                    <input type="email" name="email" value={form.email} onChange={handleChange} disabled={noEmail} />
+                    {errors.email && <small className="field-error">{errors.email}</small>}
+                  </label>
+
+                  <label className="field field-wide checkbox-field">
+                    <input type="checkbox" checked={noEmail} onChange={(e) => setNoEmail(e.target.checked)} />
+                    <span>I don&rsquo;t have an email address</span>
+                  </label>
 
                   <label className="field">
                     <span>Gender<em>*</em></span>
@@ -134,7 +149,7 @@ export default function RegistrationModal({ open, onClose }) {
                 <div className="reg-id-box">{result.registrationId}</div>
                 <p className="reg-note">
                   Save or screenshot this ID — you&rsquo;ll need it to check in at the venue.
-                  A confirmation has been emailed to you as well.
+                  {result.emailed ? ' A confirmation has been emailed to you as well.' : ' Please save this ID somewhere safe, since no email was provided.'}
                 </p>
                 <button className="btn-gold" onClick={handleClose}>Done</button>
               </div>
