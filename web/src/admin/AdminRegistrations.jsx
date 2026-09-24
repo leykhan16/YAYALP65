@@ -39,7 +39,10 @@ export default function AdminRegistrations({ token, onExpired }) {
       <div className="admin-table-wrap">
         <table className="admin-table">
           <thead>
-            <tr><th>Photo</th><th>ID</th><th>Name</th><th>Gender</th><th>Phone</th><th>Email</th><th>Community</th><th>Post Held</th><th>Parish/Area/Zone</th><th>Status</th></tr>
+            <tr>
+              <th>Photo</th><th>ID</th><th>Name</th><th>Gender</th><th>Phone</th>
+              <th>Email</th><th>Community</th><th>Post Held</th><th>Parish/Area/Zone</th><th>Status</th>
+            </tr>
           </thead>
           <tbody>
             {rows.map((r) => (
