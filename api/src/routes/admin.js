@@ -159,4 +159,27 @@ router.post('/families', async (req, res) => {
   res.status(201).json(data)
 })
 
+router.delete('/registrations/:registrationId', async (req, res) => {
+  const { registrationId } = req.params
+
+  const { data: registration } = await supabase
+    .from('registrations').select('registration_id, full_name').eq('registration_id', registrationId).maybeSingle()
+  if (!registration) return res.status(404).json({ error: 'Registration not found.' })
+
+  await supabase.from('attendance').delete().eq('registration_id', registrationId)
+
+  const { error } = await supabase.from('registrations').delete().eq('registration_id', registrationId)
+  if (error) {
+    console.error(error)
+    return res.status(500).json({ error: 'Could not delete registration.' })
+  }
+
+  await supabase.from('audit_logs').insert({
+    action: 'delete_registration', target: registrationId, admin_name: req.admin?.name || 'Admin',
+    metadata: { fullName: registration.full_name },
+  })
+
+  res.json({ success: true })
+})
+
 export default router
