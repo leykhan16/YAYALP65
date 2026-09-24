@@ -87,3 +87,26 @@ input[type="file"] {
   font-size: 0.88rem;
   background: #fff;
 }
+.checkbox-field {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  background: rgba(232, 184, 75, 0.08);
+  padding: 12px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.checkbox-field input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin: 0;
+  accent-color: var(--gold-600);
+  cursor: pointer;
+}
+.checkbox-field span {
+  font-weight: 600;
+  font-size: 0.86rem;
+  line-height: 1.3;
+  display: inline-block;
+}
