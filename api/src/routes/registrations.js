@@ -6,16 +6,23 @@ import { sendConfirmationEmail } from '../mailer.js'
 const router = Router()
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } })
 
-const required = ['fullName', 'phone', 'email', 'parish', 'area', 'zone', 'familyId', 'gender']
+const required = ['fullName', 'phone', 'parish', 'area', 'zone', 'familyId', 'gender']
 
 router.post('/', upload.single('passport'), async (req, res) => {
   const body = req.body || {}
+  const noEmail = body.noEmail === 'true' || body.noEmail === true
+
   const missing = required.filter((f) => !body[f] || !String(body[f]).trim())
   if (missing.length) {
     return res.status(400).json({ error: `Missing required fields: ${missing.join(', ')}` })
   }
-  if (!/^\S+@\S+\.\S+$/.test(body.email)) {
-    return res.status(400).json({ error: 'Enter a valid email address.' })
+  if (!noEmail) {
+    if (!body.email || !body.email.trim()) {
+      return res.status(400).json({ error: 'Enter an email address, or check "I don\'t have an email address".' })
+    }
+    if (!/^\S+@\S+\.\S+$/.test(body.email)) {
+      return res.status(400).json({ error: 'Enter a valid email address.' })
+    }
   }
   if (!req.file) {
     return res.status(400).json({ error: 'A passport photograph is required.' })
@@ -51,7 +58,7 @@ router.post('/', upload.single('passport'), async (req, res) => {
       full_name: body.fullName.trim(),
       phone: body.phone.trim(),
       whatsapp: body.whatsapp?.trim() || null,
-      email: body.email.trim(),
+      email: noEmail ? null : body.email.trim(),
       parish: body.parish.trim(),
       area: body.area.trim(),
       zone: body.zone.trim(),
@@ -69,13 +76,17 @@ router.post('/', upload.single('passport'), async (req, res) => {
     return res.status(500).json({ error: 'Registration could not be saved. Please try again.' })
   }
 
-  try {
-    await sendConfirmationEmail(data.email, { fullName: data.full_name, registrationId })
-  } catch (emailError) {
-    console.error('Email send failed (registration still saved):', emailError)
+  let emailed = false
+  if (!noEmail) {
+    try {
+      await sendConfirmationEmail(data.email, { fullName: data.full_name, registrationId })
+      emailed = true
+    } catch (emailError) {
+      console.error('Email send failed (registration still saved):', emailError)
+    }
   }
 
-  res.status(201).json({ registrationId, fullName: data.full_name })
+  res.status(201).json({ registrationId, fullName: data.full_name, emailed })
 })
 
 router.get('/:id', async (req, res) => {
