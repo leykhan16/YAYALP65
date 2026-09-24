@@ -37,4 +37,6 @@ export const api = {
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify(body),
     }),
+  adminDelete: (path, token) =>
+    request(`/api/admin${path}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }),
 }

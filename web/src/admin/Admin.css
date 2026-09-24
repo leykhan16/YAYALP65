@@ -58,3 +58,13 @@
   .admin-table { font-size: 0.8rem; min-width: 600px; }
 }
 .admin-thumb { width: 34px; height: 34px; border-radius: 6px; object-fit: cover; }
+.delete-btn {
+  background: none; border: 1px solid #b3492d; color: #b3492d;
+  padding: 5px 12px; border-radius: 999px; font-size: 0.78rem; font-weight: 700; cursor: pointer;
+  white-space: nowrap;
+}
+.dupe-warning {
+  background: #fdf0e8; color: #b3492d; border: 1px solid #f0c9b0;
+  padding: 10px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; margin-bottom: 14px;
+}
+.dupe-row { background: rgba(179, 73, 45, 0.06); }
