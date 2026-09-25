@@ -30,6 +30,8 @@ router.get('/dashboard', async (req, res) => {
   const totalRegistrations = registrations.length
   const totalPresent = attendance.length
   const totalNotPresent = totalRegistrations - totalPresent
+  const totalCheckedOut = attendance.filter((a) => a.checked_out_at).length
+  const stillOnsite = totalPresent - totalCheckedOut
   const attendanceRate = totalRegistrations ? Math.round((totalPresent / totalRegistrations) * 1000) / 10 : 0
 
   const recentRegistrations = registrations.slice(0, 6).map((r) => ({
@@ -41,7 +43,7 @@ router.get('/dashboard', async (req, res) => {
   })
 
   res.json({
-    totalRegistrations, totalPresent, totalNotPresent, attendanceRate,
+    totalRegistrations, totalPresent, totalNotPresent, totalCheckedOut, stillOnsite, attendanceRate,
     totalFamilies: families.length, recentRegistrations, recentCheckIns,
   })
 })
@@ -56,7 +58,8 @@ router.get('/registrations', async (req, res) => {
     registrationId: r.registration_id, fullName: r.full_name, phone: r.phone,
     whatsapp: r.whatsapp, email: r.email, parish: r.parish, area: r.area, zone: r.zone,
     familyId: r.family_id, familyName: familyNameById[r.family_id] || 'Unassigned',
-    department: r.department, postHeld: r.post_held, gender: r.gender, passportUrl: r.passport_url, createdAt: r.created_at,
+    department: r.department, postHeld: r.post_held, gender: r.gender, passportUrl: r.passport_url,
+    createdAt: r.created_at,
     attendanceStatus: presentIds.has(r.registration_id) ? 'present' : 'not-present',
   }))
 
@@ -86,6 +89,7 @@ router.get('/attendance', async (req, res) => {
     return {
       registrationId: a.registration_id, fullName: reg.full_name || '(unknown)',
       checkedInAt: a.checked_in_at, manual: a.manual,
+      checkedOutAt: a.checked_out_at || null,
     }
   })
 
