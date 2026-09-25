@@ -39,7 +39,7 @@ export default function AdminAttendance({ token, onExpired }) {
   }
 
   function exportCsv() {
-    downloadCsv('attendance.csv', rows, ['registrationId', 'fullName', 'checkedInAt', 'manual'])
+    downloadCsv('attendance.csv', rows, ['registrationId', 'fullName', 'checkedInAt', 'manual', 'checkedOutAt'])
   }
 
   return (
@@ -56,7 +56,7 @@ export default function AdminAttendance({ token, onExpired }) {
       </div>
       <div className="admin-table-wrap">
         <table className="admin-table">
-          <thead><tr><th>ID</th><th>Name</th><th>Checked In</th><th>Method</th></tr></thead>
+          <thead><tr><th>ID</th><th>Name</th><th>Checked In</th><th>Method</th><th>Checked Out</th></tr></thead>
           <tbody>
             {rows.map((r) => (
               <tr key={r.registrationId}>
@@ -64,6 +64,7 @@ export default function AdminAttendance({ token, onExpired }) {
                 <td>{r.fullName}</td>
                 <td>{new Date(r.checkedInAt).toLocaleString()}</td>
                 <td>{r.manual ? 'Manual (admin)' : 'Self check-in'}</td>
+                <td>{r.checkedOutAt ? new Date(r.checkedOutAt).toLocaleString() : <span className="badge not-present">still onsite</span>}</td>
               </tr>
             ))}
           </tbody>

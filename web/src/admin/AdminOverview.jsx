@@ -25,7 +25,9 @@ export default function AdminOverview({ token, onExpired }) {
     <div>
       <div className="stats-strip">
         <Stat label="Registrations" value={stats.totalRegistrations} />
-        <Stat label="Present" value={stats.totalPresent} />
+        <Stat label="Checked In" value={stats.totalPresent} />
+        <Stat label="Still Onsite" value={stats.stillOnsite} />
+        <Stat label="Checked Out" value={stats.totalCheckedOut} />
         <Stat label="Not Present" value={stats.totalNotPresent} />
         <Stat label="Attendance Rate" value={`${stats.attendanceRate}%`} />
         <Stat label="Families" value={stats.totalFamilies} />
