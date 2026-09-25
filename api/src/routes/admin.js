@@ -25,6 +25,18 @@ async function loadAll() {
   return { families: families || [], registrations: registrations || [], attendance: attendance || [] }
 }
 
+function genderBreakdown(list) {
+  const male = list.filter((r) => (r.gender || '').toLowerCase() === 'male').length
+  const female = list.filter((r) => (r.gender || '').toLowerCase() === 'female').length
+  const unspecified = list.length - male - female
+  const total = list.length
+  const pct = (n) => (total ? Math.round((n / total) * 1000) / 10 : 0)
+  return {
+    male, female, unspecified,
+    malePct: pct(male), femalePct: pct(female), unspecifiedPct: pct(unspecified),
+  }
+}
+
 router.get('/dashboard', async (req, res) => {
   const { families, registrations, attendance } = await loadAll()
   const totalRegistrations = registrations.length
@@ -33,6 +45,11 @@ router.get('/dashboard', async (req, res) => {
   const totalCheckedOut = attendance.filter((a) => a.checked_out_at).length
   const stillOnsite = totalPresent - totalCheckedOut
   const attendanceRate = totalRegistrations ? Math.round((totalPresent / totalRegistrations) * 1000) / 10 : 0
+
+  const presentIds = new Set(attendance.map((a) => a.registration_id))
+  const presentRegistrations = registrations.filter((r) => presentIds.has(r.registration_id))
+  const genderRegistered = genderBreakdown(registrations)
+  const genderPresent = genderBreakdown(presentRegistrations)
 
   const recentRegistrations = registrations.slice(0, 6).map((r) => ({
     registrationId: r.registration_id, fullName: r.full_name, createdAt: r.created_at,
@@ -45,6 +62,7 @@ router.get('/dashboard', async (req, res) => {
   res.json({
     totalRegistrations, totalPresent, totalNotPresent, totalCheckedOut, stillOnsite, attendanceRate,
     totalFamilies: families.length, recentRegistrations, recentCheckIns,
+    genderRegistered, genderPresent,
   })
 })
 
