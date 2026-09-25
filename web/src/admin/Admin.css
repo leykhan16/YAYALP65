@@ -68,3 +68,16 @@
   padding: 10px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; margin-bottom: 14px;
 }
 .dupe-row { background: rgba(179, 73, 45, 0.06); }
+.gender-section { margin-bottom: 32px; }
+.gender-section h3 { margin-bottom: 14px; font-size: 1rem; color: var(--navy-900); }
+.gender-columns { display: grid; grid-template-columns: 1fr; gap: 18px; }
+@media (min-width: 640px) { .gender-columns { grid-template-columns: 1fr 1fr; } }
+.gender-card { background: #fff; border: 1px solid #e4dcc6; border-radius: 12px; padding: 18px; }
+.gender-card h4 { font-size: 0.85rem; color: #6b7386; margin-bottom: 12px; font-weight: 700; }
+.gender-bar { display: flex; height: 14px; border-radius: 999px; overflow: hidden; background: #f0ede2; margin-bottom: 12px; }
+.gender-bar-male { background: var(--sky-500); }
+.gender-bar-female { background: var(--gold-400); }
+.gender-legend { display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; color: var(--navy-900); }
+.gender-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
+.dot-male { background: var(--sky-500); }
+.dot-female { background: var(--gold-400); }
