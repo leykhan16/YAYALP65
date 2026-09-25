@@ -24,6 +24,12 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ registrationId }),
     }),
+  checkOut: (registrationId) =>
+    request('/api/attendance/check-out', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ registrationId }),
+    }),
   adminLogin: (password) =>
     request('/api/admin/login', {
       method: 'POST',
