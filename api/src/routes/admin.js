@@ -195,6 +195,7 @@ router.get('/families/:id', async (req, res) => {
     .filter((r) => r.family_id === family.id)
     .map((r) => ({
       registrationId: r.registration_id, fullName: r.full_name, phone: r.phone,
+      email: r.email, gender: r.gender,
       attendanceStatus: presentIds.has(r.registration_id) ? 'present' : 'not-present',
     }))
   res.json({ family, members })

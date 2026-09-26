@@ -82,3 +82,9 @@
 .dot-male { background: var(--sky-500); }
 .dot-female { background: var(--gold-400); }
 .checkout-btn { background: linear-gradient(135deg, var(--sky-400), #2a5f96); color: #fff; }
+.export-buttons { display: flex; gap: 8px; }
+.export-btn {
+  background: none; border: 1px solid var(--navy-800); color: var(--navy-900);
+  padding: 9px 16px; border-radius: 999px; font-size: 0.85rem; font-weight: 700; cursor: pointer;
+}
+.export-btn:hover { background: rgba(20, 42, 94, 0.06); }

@@ -1,6 +1,24 @@
 import { useEffect, useMemo, useState } from 'react'
 import { api } from '../api'
-import { downloadCsv } from '../csv'
+import { exportCsv, exportExcel, exportPdf } from '../exportUtils'
+import ExportButtons from './ExportButtons'
+
+const COLUMNS = [
+  { key: 'registrationId', label: 'Registration ID' },
+  { key: 'fullName', label: 'Full Name' },
+  { key: 'gender', label: 'Gender' },
+  { key: 'phone', label: 'Phone' },
+  { key: 'whatsapp', label: 'WhatsApp' },
+  { key: 'email', label: 'Email' },
+  { key: 'familyName', label: 'Community' },
+  { key: 'parish', label: 'Parish' },
+  { key: 'area', label: 'Area' },
+  { key: 'zone', label: 'Zone' },
+  { key: 'postHeld', label: 'Post Held' },
+  { key: 'department', label: 'Department' },
+  { key: 'attendanceStatus', label: 'Status' },
+  { key: 'createdAt', label: 'Registered At' },
+]
 
 function findDuplicateIds(rows) {
   const seen = new Map()
@@ -41,13 +59,6 @@ export default function AdminRegistrations({ token, onExpired }) {
 
   const duplicateIds = useMemo(() => findDuplicateIds(rows), [rows])
 
-  function exportCsv() {
-    downloadCsv('registrations.csv', rows, [
-      'registrationId', 'fullName', 'gender', 'phone', 'whatsapp', 'email', 'familyName',
-      'parish', 'area', 'zone', 'postHeld', 'department', 'attendanceStatus', 'createdAt',
-    ])
-  }
-
   async function handleDelete(registrationId, fullName) {
     const confirmed = window.confirm(`Delete registration ${registrationId} (${fullName})? This cannot be undone.`)
     if (!confirmed) return
@@ -65,7 +76,11 @@ export default function AdminRegistrations({ token, onExpired }) {
     <div>
       <div className="admin-toolbar">
         <input placeholder="Search by name, ID, phone, email…" value={search} onChange={(e) => setSearch(e.target.value)} />
-        <button className="btn-gold" onClick={exportCsv}>Export CSV</button>
+        <ExportButtons
+          onCsv={() => exportCsv('registrations.csv', rows, COLUMNS)}
+          onExcel={() => exportExcel('registrations.xlsx', rows, COLUMNS)}
+          onPdf={() => exportPdf('registrations.pdf', 'YAYA65 Registrations', rows, COLUMNS)}
+        />
       </div>
       {duplicateIds.size > 0 && (
         <p className="dupe-warning">

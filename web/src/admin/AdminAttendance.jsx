@@ -1,6 +1,15 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api'
-import { downloadCsv } from '../csv'
+import { exportCsv, exportExcel, exportPdf } from '../exportUtils'
+import ExportButtons from './ExportButtons'
+
+const COLUMNS = [
+  { key: 'registrationId', label: 'Registration ID' },
+  { key: 'fullName', label: 'Full Name' },
+  { key: 'checkedInAt', label: 'Checked In' },
+  { key: 'manual', label: 'Manual' },
+  { key: 'checkedOutAt', label: 'Checked Out' },
+]
 
 export default function AdminAttendance({ token, onExpired }) {
   const [rows, setRows] = useState([])
@@ -53,9 +62,11 @@ export default function AdminAttendance({ token, onExpired }) {
     }
   }
 
-  function exportCsv() {
-    downloadCsv('attendance.csv', rows, ['registrationId', 'fullName', 'checkedInAt', 'manual', 'checkedOutAt'])
-  }
+  const exportRows = rows.map((r) => ({
+    ...r,
+    manual: r.manual ? 'Manual (admin)' : 'Self check-in',
+    checkedOutAt: r.checkedOutAt ? r.checkedOutAt : 'Still onsite',
+  }))
 
   return (
     <div>
@@ -73,7 +84,11 @@ export default function AdminAttendance({ token, onExpired }) {
 
       <div className="admin-toolbar">
         <input placeholder="Search checked-in participants…" value={search} onChange={(e) => setSearch(e.target.value)} />
-        <button className="btn-gold" onClick={exportCsv}>Export CSV</button>
+        <ExportButtons
+          onCsv={() => exportCsv('attendance.csv', exportRows, COLUMNS)}
+          onExcel={() => exportExcel('attendance.xlsx', exportRows, COLUMNS)}
+          onPdf={() => exportPdf('attendance.pdf', 'YAYA65 Attendance', exportRows, COLUMNS)}
+        />
       </div>
       <div className="admin-table-wrap">
         <table className="admin-table">
