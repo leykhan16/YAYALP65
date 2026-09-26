@@ -143,6 +143,33 @@ router.post('/attendance/manual', async (req, res) => {
   res.json({ success: true, fullName: registration.full_name })
 })
 
+router.post('/attendance/manual-checkout', async (req, res) => {
+  const registrationId = (req.body?.registrationId || '').trim()
+  if (!registrationId) return res.status(400).json({ error: 'Enter a registration ID.' })
+
+  const { data: registration } = await supabase
+    .from('registrations').select('registration_id, full_name').eq('registration_id', registrationId).maybeSingle()
+  if (!registration) return res.status(404).json({ error: 'Registration ID not found.' })
+
+  const { data: attendance } = await supabase
+    .from('attendance').select('registration_id, checked_out_at').eq('registration_id', registrationId).maybeSingle()
+  if (!attendance) return res.status(400).json({ error: 'This person has not checked in yet.' })
+  if (attendance.checked_out_at) return res.status(200).json({ alreadyCheckedOut: true, fullName: registration.full_name })
+
+  const { error } = await supabase
+    .from('attendance')
+    .update({ checked_out_at: new Date().toISOString() })
+    .eq('registration_id', registrationId)
+  if (error) return res.status(500).json({ error: 'Could not record check-out.' })
+
+  await supabase.from('audit_logs').insert({
+    action: 'manual_check_out', target: registrationId, admin_name: req.admin?.name || 'Admin',
+    metadata: { fullName: registration.full_name },
+  })
+
+  res.json({ success: true, fullName: registration.full_name })
+})
+
 router.get('/families', async (req, res) => {
   const { families, registrations, attendance } = await loadAll()
   const presentIds = new Set(attendance.map((a) => a.registration_id))
