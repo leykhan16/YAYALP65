@@ -16,6 +16,8 @@ router.post('/', upload.single('passport'), async (req, res) => {
   if (missing.length) {
     return res.status(400).json({ error: `Missing required fields: ${missing.join(', ')}` })
   }
+
+  let email = null
   if (!noEmail) {
     if (!body.email || !body.email.trim()) {
       return res.status(400).json({ error: 'Enter an email address, or check "I don\'t have an email address".' })
@@ -23,7 +25,9 @@ router.post('/', upload.single('passport'), async (req, res) => {
     if (!/^\S+@\S+\.\S+$/.test(body.email)) {
       return res.status(400).json({ error: 'Enter a valid email address.' })
     }
+    email = body.email.trim()
   }
+
   if (!req.file) {
     return res.status(400).json({ error: 'A passport photograph is required.' })
   }
@@ -58,7 +62,7 @@ router.post('/', upload.single('passport'), async (req, res) => {
       full_name: body.fullName.trim(),
       phone: body.phone.trim(),
       whatsapp: body.whatsapp?.trim() || null,
-      email: noEmail ? null : body.email.trim(),
+      email,
       parish: body.parish.trim(),
       area: body.area.trim(),
       zone: body.zone.trim(),
@@ -77,7 +81,7 @@ router.post('/', upload.single('passport'), async (req, res) => {
   }
 
   let emailed = false
-  if (!noEmail) {
+  if (email) {
     try {
       await sendConfirmationEmail(data.email, { fullName: data.full_name, registrationId })
       emailed = true
