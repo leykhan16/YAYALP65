@@ -88,3 +88,7 @@
   padding: 9px 16px; border-radius: 999px; font-size: 0.85rem; font-weight: 700; cursor: pointer;
 }
 .export-btn:hover { background: rgba(20, 42, 94, 0.06); }
+.community-filter {
+  padding: 10px 12px; border: 1px solid #d8cfb4; border-radius: 8px;
+  font-family: var(--font-body); font-size: 0.88rem; background: #fff; min-width: 160px;
+}

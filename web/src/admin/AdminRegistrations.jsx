@@ -38,12 +38,19 @@ function findDuplicateIds(rows) {
 export default function AdminRegistrations({ token, onExpired }) {
   const [rows, setRows] = useState([])
   const [search, setSearch] = useState('')
+  const [families, setFamilies] = useState([])
+  const [familyId, setFamilyId] = useState('')
   const [actionMsg, setActionMsg] = useState('')
+
+  useEffect(() => {
+    api.getFamilies().then(setFamilies).catch(() => {})
+  }, [])
 
   async function load() {
     try {
       const params = new URLSearchParams()
       if (search) params.set('search', search)
+      if (familyId) params.set('familyId', familyId)
       const data = await api.adminGet(`/registrations?${params.toString()}`, token)
       setRows(data)
     } catch (err) {
@@ -55,9 +62,15 @@ export default function AdminRegistrations({ token, onExpired }) {
     load()
     const interval = setInterval(load, 6000)
     return () => clearInterval(interval)
-  }, [token, search])
+  }, [token, search, familyId])
 
   const duplicateIds = useMemo(() => findDuplicateIds(rows), [rows])
+  const selectedCommunityName = families.find((f) => f.id === familyId)?.name
+
+  function exportName(base, ext) {
+    const suffix = selectedCommunityName ? `-${selectedCommunityName.toLowerCase().replace(/\s+/g, '-')}` : ''
+    return `${base}${suffix}.${ext}`
+  }
 
   async function handleDelete(registrationId, fullName) {
     const confirmed = window.confirm(`Delete registration ${registrationId} (${fullName})? This cannot be undone.`)
@@ -76,10 +89,14 @@ export default function AdminRegistrations({ token, onExpired }) {
     <div>
       <div className="admin-toolbar">
         <input placeholder="Search by name, ID, phone, email…" value={search} onChange={(e) => setSearch(e.target.value)} />
+        <select value={familyId} onChange={(e) => setFamilyId(e.target.value)} className="community-filter">
+          <option value="">All Communities</option>
+          {families.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
+        </select>
         <ExportButtons
-          onCsv={() => exportCsv('registrations.csv', rows, COLUMNS)}
-          onExcel={() => exportExcel('registrations.xlsx', rows, COLUMNS)}
-          onPdf={() => exportPdf('registrations.pdf', 'YAYA65 Registrations', rows, COLUMNS)}
+          onCsv={() => exportCsv(exportName('registrations', 'csv'), rows, COLUMNS)}
+          onExcel={() => exportExcel(exportName('registrations', 'xlsx'), rows, COLUMNS)}
+          onPdf={() => exportPdf(exportName('registrations', 'pdf'), `YAYA65 Registrations${selectedCommunityName ? ' — ' + selectedCommunityName : ''}`, rows, COLUMNS)}
         />
       </div>
       {duplicateIds.size > 0 && (

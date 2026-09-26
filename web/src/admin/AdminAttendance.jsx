@@ -6,6 +6,7 @@ import ExportButtons from './ExportButtons'
 const COLUMNS = [
   { key: 'registrationId', label: 'Registration ID' },
   { key: 'fullName', label: 'Full Name' },
+  { key: 'familyName', label: 'Community' },
   { key: 'checkedInAt', label: 'Checked In' },
   { key: 'manual', label: 'Manual' },
   { key: 'checkedOutAt', label: 'Checked Out' },
@@ -14,15 +15,22 @@ const COLUMNS = [
 export default function AdminAttendance({ token, onExpired }) {
   const [rows, setRows] = useState([])
   const [search, setSearch] = useState('')
+  const [families, setFamilies] = useState([])
+  const [familyId, setFamilyId] = useState('')
   const [manualId, setManualId] = useState('')
   const [manualMsg, setManualMsg] = useState('')
   const [checkoutId, setCheckoutId] = useState('')
   const [checkoutMsg, setCheckoutMsg] = useState('')
 
+  useEffect(() => {
+    api.getFamilies().then(setFamilies).catch(() => {})
+  }, [])
+
   async function load() {
     try {
       const params = new URLSearchParams()
       if (search) params.set('search', search)
+      if (familyId) params.set('familyId', familyId)
       const data = await api.adminGet(`/attendance?${params.toString()}`, token)
       setRows(data)
     } catch (err) {
@@ -34,7 +42,7 @@ export default function AdminAttendance({ token, onExpired }) {
     load()
     const interval = setInterval(load, 6000)
     return () => clearInterval(interval)
-  }, [token, search])
+  }, [token, search, familyId])
 
   async function handleManual(e) {
     e.preventDefault()
@@ -62,6 +70,12 @@ export default function AdminAttendance({ token, onExpired }) {
     }
   }
 
+  const selectedCommunityName = families.find((f) => f.id === familyId)?.name
+  function exportName(base, ext) {
+    const suffix = selectedCommunityName ? `-${selectedCommunityName.toLowerCase().replace(/\s+/g, '-')}` : ''
+    return `${base}${suffix}.${ext}`
+  }
+
   const exportRows = rows.map((r) => ({
     ...r,
     manual: r.manual ? 'Manual (admin)' : 'Self check-in',
@@ -84,20 +98,25 @@ export default function AdminAttendance({ token, onExpired }) {
 
       <div className="admin-toolbar">
         <input placeholder="Search checked-in participants…" value={search} onChange={(e) => setSearch(e.target.value)} />
+        <select value={familyId} onChange={(e) => setFamilyId(e.target.value)} className="community-filter">
+          <option value="">All Communities</option>
+          {families.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
+        </select>
         <ExportButtons
-          onCsv={() => exportCsv('attendance.csv', exportRows, COLUMNS)}
-          onExcel={() => exportExcel('attendance.xlsx', exportRows, COLUMNS)}
-          onPdf={() => exportPdf('attendance.pdf', 'YAYA65 Attendance', exportRows, COLUMNS)}
+          onCsv={() => exportCsv(exportName('attendance', 'csv'), exportRows, COLUMNS)}
+          onExcel={() => exportExcel(exportName('attendance', 'xlsx'), exportRows, COLUMNS)}
+          onPdf={() => exportPdf(exportName('attendance', 'pdf'), `YAYA65 Attendance${selectedCommunityName ? ' — ' + selectedCommunityName : ''}`, exportRows, COLUMNS)}
         />
       </div>
       <div className="admin-table-wrap">
         <table className="admin-table">
-          <thead><tr><th>ID</th><th>Name</th><th>Checked In</th><th>Method</th><th>Checked Out</th></tr></thead>
+          <thead><tr><th>ID</th><th>Name</th><th>Community</th><th>Checked In</th><th>Method</th><th>Checked Out</th></tr></thead>
           <tbody>
             {rows.map((r) => (
               <tr key={r.registrationId}>
                 <td>{r.registrationId}</td>
                 <td>{r.fullName}</td>
+                <td>{r.familyName}</td>
                 <td>{new Date(r.checkedInAt).toLocaleString()}</td>
                 <td>{r.manual ? 'Manual (admin)' : 'Self check-in'}</td>
                 <td>{r.checkedOutAt ? new Date(r.checkedOutAt).toLocaleString() : <span className="badge not-present">still onsite</span>}</td>

@@ -48,7 +48,10 @@ export default function AdminFamilies({ token, onExpired }) {
     setSelected(id)
     setSelectedName(name)
     const data = await api.adminGet(`/families/${id}`, token)
-    setMembers(data.members)
+    const sorted = [...data.members].sort((a, b) =>
+      a.registrationId.localeCompare(b.registrationId, undefined, { numeric: true })
+    )
+    setMembers(sorted)
   }
 
   async function handleAdd(e) {
