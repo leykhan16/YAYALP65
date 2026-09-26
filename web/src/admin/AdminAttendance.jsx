@@ -7,6 +7,8 @@ export default function AdminAttendance({ token, onExpired }) {
   const [search, setSearch] = useState('')
   const [manualId, setManualId] = useState('')
   const [manualMsg, setManualMsg] = useState('')
+  const [checkoutId, setCheckoutId] = useState('')
+  const [checkoutMsg, setCheckoutMsg] = useState('')
 
   async function load() {
     try {
@@ -38,6 +40,19 @@ export default function AdminAttendance({ token, onExpired }) {
     }
   }
 
+  async function handleCheckout(e) {
+    e.preventDefault()
+    setCheckoutMsg('')
+    try {
+      const data = await api.adminPost('/attendance/manual-checkout', token, { registrationId: checkoutId.trim().toUpperCase() })
+      setCheckoutMsg(data.alreadyCheckedOut ? `${data.fullName} was already checked out.` : `${data.fullName} marked checked out.`)
+      setCheckoutId('')
+      load()
+    } catch (err) {
+      setCheckoutMsg(err.message)
+    }
+  }
+
   function exportCsv() {
     downloadCsv('attendance.csv', rows, ['registrationId', 'fullName', 'checkedInAt', 'manual', 'checkedOutAt'])
   }
@@ -49,6 +64,12 @@ export default function AdminAttendance({ token, onExpired }) {
         <button className="btn-gold" type="submit">Mark Present</button>
       </form>
       {manualMsg && <p className="manual-msg">{manualMsg}</p>}
+
+      <form className="admin-manual-form" onSubmit={handleCheckout}>
+        <input placeholder="Manual check-out — registration ID" value={checkoutId} onChange={(e) => setCheckoutId(e.target.value)} />
+        <button className="btn-gold checkout-btn" type="submit">Mark Checked Out</button>
+      </form>
+      {checkoutMsg && <p className="manual-msg">{checkoutMsg}</p>}
 
       <div className="admin-toolbar">
         <input placeholder="Search checked-in participants…" value={search} onChange={(e) => setSearch(e.target.value)} />

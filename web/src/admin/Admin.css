@@ -81,3 +81,4 @@
 .gender-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
 .dot-male { background: var(--sky-500); }
 .dot-female { background: var(--gold-400); }
+.checkout-btn { background: linear-gradient(135deg, var(--sky-400), #2a5f96); color: #fff; }
