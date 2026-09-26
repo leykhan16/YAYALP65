@@ -94,18 +94,22 @@ router.get('/registrations', async (req, res) => {
   if (department) rows = rows.filter((r) => r.department === department)
   if (status) rows = rows.filter((r) => r.attendanceStatus === status)
 
+  rows.sort((a, b) => a.registrationId.localeCompare(b.registrationId, undefined, { numeric: true }))
+
   res.json(rows)
 })
 
 router.get('/attendance', async (req, res) => {
-  const { registrations, attendance } = await loadAll()
+  const { families, registrations, attendance } = await loadAll()
   const regById = Object.fromEntries(registrations.map((r) => [r.registration_id, r]))
-  const { search = '' } = req.query
+  const familyNameById = Object.fromEntries(families.map((f) => [f.id, f.name]))
+  const { search = '', familyId } = req.query
 
   let rows = attendance.map((a) => {
     const reg = regById[a.registration_id] || {}
     return {
       registrationId: a.registration_id, fullName: reg.full_name || '(unknown)',
+      familyId: reg.family_id || null, familyName: familyNameById[reg.family_id] || 'Unassigned',
       checkedInAt: a.checked_in_at, manual: a.manual,
       checkedOutAt: a.checked_out_at || null,
     }
@@ -115,6 +119,10 @@ router.get('/attendance', async (req, res) => {
   if (term) {
     rows = rows.filter((r) => [r.registrationId, r.fullName].some((v) => (v || '').toLowerCase().includes(term)))
   }
+  if (familyId) rows = rows.filter((r) => r.familyId === familyId)
+
+  rows.sort((a, b) => a.registrationId.localeCompare(b.registrationId, undefined, { numeric: true }))
+
   res.json(rows)
 })
 
