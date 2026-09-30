@@ -244,8 +244,18 @@ router.post('/broadcast-email', async (req, res) => {
   if (error) return res.status(500).json({ error: 'Could not load recipient list.' })
 
   const recipients = registrations.filter((r) => r.email && r.email.trim())
-  const result = await sendBatch(recipients, subject.trim(), message.trim(), req.admin?.name || 'Admin')
-  res.json(result)
+  const adminName = req.admin?.name || 'Admin'
+
+  const { data: pendingLog } = await supabase.from('audit_logs').insert({
+    action: 'broadcast_email', target: 'all_registrants', admin_name: adminName,
+    metadata: { subject: subject.trim(), message: message.trim(), status: 'in_progress', totalRecipients: recipients.length, sent: 0, failed: 0 },
+  }).select().single()
+
+  res.json({ started: true, logId: pendingLog?.id, totalRecipients: recipients.length })
+
+  sendBatch(recipients, subject.trim(), message.trim(), adminName, pendingLog?.id).catch((err) => {
+    console.error('Broadcast batch crashed:', err)
+  })
 })
 
 router.post('/broadcast-email/retry/:logId', async (req, res) => {
@@ -255,8 +265,18 @@ router.post('/broadcast-email/retry/:logId', async (req, res) => {
   }
 
   const recipients = log.metadata.failedRecipients
-  const result = await sendBatch(recipients, log.metadata.subject, log.metadata.message, req.admin?.name || 'Admin')
-  res.json(result)
+  const adminName = req.admin?.name || 'Admin'
+
+  const { data: pendingLog } = await supabase.from('audit_logs').insert({
+    action: 'broadcast_email', target: 'retry', admin_name: adminName,
+    metadata: { subject: log.metadata.subject, message: log.metadata.message, status: 'in_progress', totalRecipients: recipients.length, sent: 0, failed: 0 },
+  }).select().single()
+
+  res.json({ started: true, logId: pendingLog?.id, totalRecipients: recipients.length })
+
+  sendBatch(recipients, log.metadata.subject, log.metadata.message, adminName, pendingLog?.id).catch((err) => {
+    console.error('Broadcast retry crashed:', err)
+  })
 })
 
 router.get('/broadcast-history', async (req, res) => {
@@ -274,6 +294,7 @@ router.get('/broadcast-history', async (req, res) => {
     sent: log.metadata?.sent ?? 0,
     failed: log.metadata?.failed ?? 0,
     totalRecipients: log.metadata?.totalRecipients ?? 0,
+    status: log.metadata?.status || 'complete',
     adminName: log.admin_name,
     sentAt: log.created_at,
   }))
