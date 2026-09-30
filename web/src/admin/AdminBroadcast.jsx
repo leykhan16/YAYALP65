@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { api } from '../api'
 
 export default function AdminBroadcast({ token, onExpired }) {
@@ -10,6 +10,22 @@ export default function AdminBroadcast({ token, onExpired }) {
   const [sending, setSending] = useState(false)
   const [result, setResult] = useState(null)
   const [error, setError] = useState('')
+  const [history, setHistory] = useState([])
+
+  async function loadHistory() {
+    try {
+      const data = await api.adminGet('/broadcast-history', token)
+      setHistory(data)
+    } catch (err) {
+      if (err.message.includes('Session')) onExpired()
+    }
+  }
+
+  useEffect(() => {
+    loadHistory()
+  }, [token])
+
+  const totalEverSent = history.reduce((sum, h) => sum + h.sent, 0)
 
   async function handleTestSend() {
     setTestMsg('')
@@ -45,6 +61,7 @@ export default function AdminBroadcast({ token, onExpired }) {
     try {
       const data = await api.adminPost('/broadcast-email', token, { subject, message })
       setResult(data)
+      loadHistory()
     } catch (err) {
       if (err.message.includes('Session')) onExpired()
       setError(err.message)
@@ -95,6 +112,32 @@ export default function AdminBroadcast({ token, onExpired }) {
         <button className="btn-gold" onClick={handleSend} disabled={sending}>
           {sending ? 'Sending…' : 'Send to All Registrants'}
         </button>
+      </div>
+
+      <div className="broadcast-history">
+        <h3>Broadcast History</h3>
+        <p className="broadcast-note">Total emails sent across all broadcasts: <strong>{totalEverSent}</strong></p>
+        {history.length === 0 ? (
+          <p className="admin-empty">No broadcasts sent yet.</p>
+        ) : (
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+              <thead><tr><th>Subject</th><th>Sent</th><th>Failed</th><th>Total Recipients</th><th>By</th><th>When</th></tr></thead>
+              <tbody>
+                {history.map((h) => (
+                  <tr key={h.id}>
+                    <td>{h.subject}</td>
+                    <td>{h.sent}</td>
+                    <td>{h.failed}</td>
+                    <td>{h.totalRecipients}</td>
+                    <td>{h.adminName}</td>
+                    <td>{new Date(h.sentAt).toLocaleString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   )

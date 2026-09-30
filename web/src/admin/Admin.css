@@ -109,3 +109,4 @@
   border: 1px solid #d8cfb4; border-radius: 8px; font-family: var(--font-body);
 }
 .test-btn { background: linear-gradient(135deg, var(--sky-400), #2a5f96); color: #fff; white-space: nowrap; }
+.broadcast-history { margin-top: 40px; padding-top: 24px; border-top: 1px solid #e4dcc6; }
