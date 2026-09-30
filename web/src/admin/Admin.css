@@ -110,3 +110,4 @@
 }
 .test-btn { background: linear-gradient(135deg, var(--sky-400), #2a5f96); color: #fff; white-space: nowrap; }
 .broadcast-history { margin-top: 40px; padding-top: 24px; border-top: 1px solid #e4dcc6; }
+.broadcast-progress { background: rgba(63, 127, 193, 0.1); border-color: #3f7fc1; color: #2a5f96; font-weight: 600; }
