@@ -11,6 +11,8 @@ export default function AdminBroadcast({ token, onExpired }) {
   const [result, setResult] = useState(null)
   const [error, setError] = useState('')
   const [history, setHistory] = useState([])
+  const [retryingId, setRetryingId] = useState(null)
+  const [retryMsg, setRetryMsg] = useState('')
 
   async function loadHistory() {
     try {
@@ -70,18 +72,35 @@ export default function AdminBroadcast({ token, onExpired }) {
     }
   }
 
+  async function handleRetry(logId, failedCount) {
+    const confirmed = window.confirm(`Retry sending to the ${failedCount} recipient(s) who failed in this broadcast?`)
+    if (!confirmed) return
+    setRetryMsg('')
+    setRetryingId(logId)
+    try {
+      const data = await api.adminPost(`/broadcast-email/retry/${logId}`, token, {})
+      setRetryMsg(`Retry complete: ${data.sent} sent, ${data.failed} still failed.`)
+      loadHistory()
+    } catch (err) {
+      if (err.message.includes('Session')) onExpired()
+      setRetryMsg(err.message)
+    } finally {
+      setRetryingId(null)
+    }
+  }
+
   return (
     <div className="broadcast-wrap">
       <h3>Broadcast Email</h3>
       <p className="broadcast-note">
         Sends to every registrant who provided an email address. Sending is throttled to avoid spam flags,
-        so this may take a few minutes for a large list — please don&rsquo;t close this tab while it&rsquo;s running.
+        so this may take several minutes for a large list — please don&rsquo;t close this tab while it&rsquo;s running.
       </p>
       {error && <p className="form-error">{error}</p>}
       {result && (
         <p className="manual-msg">
           Sent to {result.sent} of {result.totalRecipients} recipients.
-          {result.failed > 0 && ` ${result.failed} failed to send.`}
+          {result.failed > 0 && ` ${result.failed} failed to send — see history below to retry just those.`}
         </p>
       )}
 
@@ -117,12 +136,13 @@ export default function AdminBroadcast({ token, onExpired }) {
       <div className="broadcast-history">
         <h3>Broadcast History</h3>
         <p className="broadcast-note">Total emails sent across all broadcasts: <strong>{totalEverSent}</strong></p>
+        {retryMsg && <p className="manual-msg">{retryMsg}</p>}
         {history.length === 0 ? (
           <p className="admin-empty">No broadcasts sent yet.</p>
         ) : (
           <div className="admin-table-wrap">
             <table className="admin-table">
-              <thead><tr><th>Subject</th><th>Sent</th><th>Failed</th><th>Total Recipients</th><th>By</th><th>When</th></tr></thead>
+              <thead><tr><th>Subject</th><th>Sent</th><th>Failed</th><th>Total Recipients</th><th>By</th><th>When</th><th></th></tr></thead>
               <tbody>
                 {history.map((h) => (
                   <tr key={h.id}>
@@ -132,6 +152,17 @@ export default function AdminBroadcast({ token, onExpired }) {
                     <td>{h.totalRecipients}</td>
                     <td>{h.adminName}</td>
                     <td>{new Date(h.sentAt).toLocaleString()}</td>
+                    <td>
+                      {h.failed > 0 && (
+                        <button
+                          className="resend-btn"
+                          onClick={() => handleRetry(h.id, h.failed)}
+                          disabled={retryingId === h.id}
+                        >
+                          {retryingId === h.id ? 'Retrying…' : `Retry ${h.failed} Failed`}
+                        </button>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
