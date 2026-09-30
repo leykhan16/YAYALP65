@@ -239,6 +239,28 @@ router.post('/broadcast-email', async (req, res) => {
   res.json({ sent, failed, totalRecipients: recipients.length, failedList })
 })
 
+router.get('/broadcast-history', async (req, res) => {
+  const { data, error } = await supabase
+    .from('audit_logs')
+    .select('*')
+    .eq('action', 'broadcast_email')
+    .order('created_at', { ascending: false })
+
+  if (error) return res.status(500).json({ error: 'Could not load broadcast history.' })
+
+  const rows = data.map((log) => ({
+    id: log.id,
+    subject: log.metadata?.subject || '(no subject)',
+    sent: log.metadata?.sent ?? 0,
+    failed: log.metadata?.failed ?? 0,
+    totalRecipients: log.metadata?.totalRecipients ?? 0,
+    adminName: log.admin_name,
+    sentAt: log.created_at,
+  }))
+
+  res.json(rows)
+})
+
 router.get('/families', async (req, res) => {
   const { families, registrations, attendance } = await loadAll()
   const presentIds = new Set(attendance.map((a) => a.registration_id))
