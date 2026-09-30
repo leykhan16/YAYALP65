@@ -199,6 +199,37 @@ router.post('/broadcast-email/test', async (req, res) => {
   }
 })
 
+async function sendBatch(recipients, subject, message, adminName) {
+  const { sendBroadcastEmail } = await import('../mailer.js')
+  let sent = 0
+  let failed = 0
+  const failedList = []
+  const failedErrors = []
+
+  for (const r of recipients) {
+    try {
+      await sendBroadcastEmail(r.email, { fullName: r.full_name, subject, message })
+      sent++
+    } catch (err) {
+      console.error(`Broadcast failed for ${r.registration_id}:`, err.message)
+      failed++
+      failedList.push({ registrationId: r.registration_id, email: r.email, fullName: r.full_name })
+      failedErrors.push(err.message)
+    }
+    await new Promise((resolve) => setTimeout(resolve, 2000))
+  }
+
+  const { data: log } = await supabase.from('audit_logs').insert({
+    action: 'broadcast_email', target: 'all_registrants', admin_name: adminName,
+    metadata: {
+      subject, message, sent, failed, totalRecipients: recipients.length,
+      failedRecipients: failedList, lastError: failedErrors[failedErrors.length - 1] || null,
+    },
+  }).select().single()
+
+  return { sent, failed, totalRecipients: recipients.length, failedList, logId: log?.id }
+}
+
 router.post('/broadcast-email', async (req, res) => {
   const { subject, message } = req.body || {}
   if (!subject || !subject.trim() || !message || !message.trim()) {
@@ -213,30 +244,19 @@ router.post('/broadcast-email', async (req, res) => {
   if (error) return res.status(500).json({ error: 'Could not load recipient list.' })
 
   const recipients = registrations.filter((r) => r.email && r.email.trim())
-  const { sendBroadcastEmail } = await import('../mailer.js')
+  const result = await sendBatch(recipients, subject.trim(), message.trim(), req.admin?.name || 'Admin')
+  res.json(result)
+})
 
-  let sent = 0
-  let failed = 0
-  const failedList = []
-
-  for (const r of recipients) {
-    try {
-      await sendBroadcastEmail(r.email, { fullName: r.full_name, subject: subject.trim(), message: message.trim() })
-      sent++
-    } catch (err) {
-      console.error(`Broadcast failed for ${r.registration_id}:`, err.message)
-      failed++
-      failedList.push(r.registration_id)
-    }
-    await new Promise((resolve) => setTimeout(resolve, 350))
+router.post('/broadcast-email/retry/:logId', async (req, res) => {
+  const { data: log } = await supabase.from('audit_logs').select('*').eq('id', req.params.logId).maybeSingle()
+  if (!log || !log.metadata?.failedRecipients?.length) {
+    return res.status(400).json({ error: 'No failed recipients found for that broadcast.' })
   }
 
-  await supabase.from('audit_logs').insert({
-    action: 'broadcast_email', target: 'all_registrants', admin_name: req.admin?.name || 'Admin',
-    metadata: { subject: subject.trim(), sent, failed, totalRecipients: recipients.length },
-  })
-
-  res.json({ sent, failed, totalRecipients: recipients.length, failedList })
+  const recipients = log.metadata.failedRecipients
+  const result = await sendBatch(recipients, log.metadata.subject, log.metadata.message, req.admin?.name || 'Admin')
+  res.json(result)
 })
 
 router.get('/broadcast-history', async (req, res) => {
