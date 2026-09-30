@@ -4,9 +4,29 @@ import { api } from '../api'
 export default function AdminBroadcast({ token, onExpired }) {
   const [subject, setSubject] = useState('')
   const [message, setMessage] = useState('')
+  const [testEmail, setTestEmail] = useState('')
+  const [testSending, setTestSending] = useState(false)
+  const [testMsg, setTestMsg] = useState('')
   const [sending, setSending] = useState(false)
   const [result, setResult] = useState(null)
   const [error, setError] = useState('')
+
+  async function handleTestSend() {
+    setTestMsg('')
+    setError('')
+    if (!testEmail.trim()) { setTestMsg('Enter an email address for the test.'); return }
+    if (!subject.trim() || !message.trim()) { setError('Fill in subject and message first.'); return }
+    setTestSending(true)
+    try {
+      await api.adminPost('/broadcast-email/test', token, { email: testEmail, subject, message })
+      setTestMsg(`Test email sent to ${testEmail}. Check your inbox before sending to everyone.`)
+    } catch (err) {
+      if (err.message.includes('Session')) onExpired()
+      setTestMsg(err.message)
+    } finally {
+      setTestSending(false)
+    }
+  }
 
   async function handleSend(e) {
     e.preventDefault()
@@ -47,7 +67,8 @@ export default function AdminBroadcast({ token, onExpired }) {
           {result.failed > 0 && ` ${result.failed} failed to send.`}
         </p>
       )}
-      <form onSubmit={handleSend} className="broadcast-form">
+
+      <div className="broadcast-form">
         <label className="field">
           <span>Subject</span>
           <input value={subject} onChange={(e) => setSubject(e.target.value)} disabled={sending} />
@@ -56,10 +77,25 @@ export default function AdminBroadcast({ token, onExpired }) {
           <span>Message</span>
           <textarea rows={10} value={message} onChange={(e) => setMessage(e.target.value)} disabled={sending} />
         </label>
-        <button className="btn-gold" type="submit" disabled={sending}>
+
+        <div className="test-send-row">
+          <input
+            type="email"
+            placeholder="Your email — send a test copy first"
+            value={testEmail}
+            onChange={(e) => setTestEmail(e.target.value)}
+            disabled={testSending}
+          />
+          <button type="button" className="btn-gold test-btn" onClick={handleTestSend} disabled={testSending}>
+            {testSending ? 'Sending test…' : 'Send Test to Me'}
+          </button>
+        </div>
+        {testMsg && <p className="manual-msg">{testMsg}</p>}
+
+        <button className="btn-gold" onClick={handleSend} disabled={sending}>
           {sending ? 'Sending…' : 'Send to All Registrants'}
         </button>
-      </form>
+      </div>
     </div>
   )
 }

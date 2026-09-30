@@ -99,3 +99,13 @@
   border: 1px solid #d8cfb4; border-radius: 10px; padding: 12px; font-family: var(--font-body);
   font-size: 0.95rem; resize: vertical;
 }
+.test-send-row {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  background: rgba(63, 127, 193, 0.08);
+  padding: 12px; border-radius: 10px;
+}
+.test-send-row input {
+  flex: 1; min-width: 220px; padding: 10px 12px;
+  border: 1px solid #d8cfb4; border-radius: 8px; font-family: var(--font-body);
+}
+.test-btn { background: linear-gradient(135deg, var(--sky-400), #2a5f96); color: #fff; white-space: nowrap; }
