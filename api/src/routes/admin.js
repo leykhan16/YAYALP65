@@ -210,11 +210,21 @@ async function sendBatch(recipients, subject, message, adminName) {
     try {
       await sendBroadcastEmail(r.email, { fullName: r.full_name, subject, message })
       sent++
+      if (logId) {
+        await supabase.from('broadcast_recipients').insert({
+          broadcast_log_id: logId, registration_id: r.registration_id, email: r.email, status: 'sent',
+        })
+      }
     } catch (err) {
       console.error(`Broadcast failed for ${r.registration_id}:`, err.message)
       failed++
       failedList.push({ registrationId: r.registration_id, email: r.email, fullName: r.full_name })
       failedErrors.push(err.message)
+      if (logId) {
+        await supabase.from('broadcast_recipients').insert({
+          broadcast_log_id: logId, registration_id: r.registration_id, email: r.email, status: 'failed', error: err.message,
+        })
+      }
     }
     await new Promise((resolve) => setTimeout(resolve, 2000))
   }
@@ -300,6 +310,15 @@ router.get('/broadcast-history', async (req, res) => {
   }))
 
   res.json(rows)
+})
+
+router.get('/broadcast-recipients/:logId', async (req, res) => {
+  const { data, error } = await supabase
+    .from('broadcast_recipients')
+    .select('registration_id, email, status')
+    .eq('broadcast_log_id', req.params.logId)
+  if (error) return res.status(500).json({ error: 'Could not load recipient detail.' })
+  res.json(data)
 })
 
 router.get('/families', async (req, res) => {
