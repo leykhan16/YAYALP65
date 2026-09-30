@@ -178,6 +178,27 @@ router.post('/attendance/manual-checkout', async (req, res) => {
   res.json({ success: true, fullName: registration.full_name })
 })
 
+router.post('/broadcast-email/test', async (req, res) => {
+  const { email, subject, message } = req.body || {}
+  if (!email || !email.trim()) return res.status(400).json({ error: 'Enter an email address to send the test to.' })
+  if (!subject || !subject.trim() || !message || !message.trim()) {
+    return res.status(400).json({ error: 'Subject and message are both required.' })
+  }
+
+  const { sendBroadcastEmail } = await import('../mailer.js')
+  try {
+    await sendBroadcastEmail(email.trim(), {
+      fullName: req.admin?.name || 'Admin',
+      subject: `[TEST] ${subject.trim()}`,
+      message: message.trim(),
+    })
+    res.json({ success: true })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Test email could not be sent. Check the address and try again.' })
+  }
+})
+
 router.post('/broadcast-email', async (req, res) => {
   const { subject, message } = req.body || {}
   if (!subject || !subject.trim() || !message || !message.trim()) {
