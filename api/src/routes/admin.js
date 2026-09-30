@@ -178,6 +178,46 @@ router.post('/attendance/manual-checkout', async (req, res) => {
   res.json({ success: true, fullName: registration.full_name })
 })
 
+router.post('/broadcast-email', async (req, res) => {
+  const { subject, message } = req.body || {}
+  if (!subject || !subject.trim() || !message || !message.trim()) {
+    return res.status(400).json({ error: 'Subject and message are both required.' })
+  }
+
+  const { data: registrations, error } = await supabase
+    .from('registrations')
+    .select('registration_id, full_name, email')
+    .not('email', 'is', null)
+
+  if (error) return res.status(500).json({ error: 'Could not load recipient list.' })
+
+  const recipients = registrations.filter((r) => r.email && r.email.trim())
+  const { sendBroadcastEmail } = await import('../mailer.js')
+
+  let sent = 0
+  let failed = 0
+  const failedList = []
+
+  for (const r of recipients) {
+    try {
+      await sendBroadcastEmail(r.email, { fullName: r.full_name, subject: subject.trim(), message: message.trim() })
+      sent++
+    } catch (err) {
+      console.error(`Broadcast failed for ${r.registration_id}:`, err.message)
+      failed++
+      failedList.push(r.registration_id)
+    }
+    await new Promise((resolve) => setTimeout(resolve, 350))
+  }
+
+  await supabase.from('audit_logs').insert({
+    action: 'broadcast_email', target: 'all_registrants', admin_name: req.admin?.name || 'Admin',
+    metadata: { subject: subject.trim(), sent, failed, totalRecipients: recipients.length },
+  })
+
+  res.json({ sent, failed, totalRecipients: recipients.length, failedList })
+})
+
 router.get('/families', async (req, res) => {
   const { families, registrations, attendance } = await loadAll()
   const presentIds = new Set(attendance.map((a) => a.registration_id))

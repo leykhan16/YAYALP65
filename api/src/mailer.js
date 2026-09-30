@@ -27,3 +27,22 @@ export async function sendConfirmationEmail(to, { fullName, registrationId }) {
     `,
   })
 }
+
+export async function sendBroadcastEmail(to, { fullName, subject, message }) {
+  const htmlMessage = message
+    .split('\n\n')
+    .map((para) => `<p style="margin:0 0 14px;">${para.replace(/\n/g, '<br/>')}</p>`)
+    .join('')
+
+  return transporter.sendMail({
+    from: `"YAYA65 On Eagle's Wings" <${process.env.GMAIL_USER}>`,
+    to,
+    subject,
+    html: `
+      <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; color:#1c2436;">
+        <p>Dear ${fullName},</p>
+        ${htmlMessage}
+      </div>
+    `,
+  })
+}
