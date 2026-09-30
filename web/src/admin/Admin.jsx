@@ -4,9 +4,10 @@ import AdminOverview from './AdminOverview'
 import AdminRegistrations from './AdminRegistrations'
 import AdminAttendance from './AdminAttendance'
 import AdminFamilies from './AdminFamilies'
+import AdminBroadcast from './AdminBroadcast'
 import './Admin.css'
 
-const TABS = ['Overview', 'Registrations', 'Attendance', 'Communities']
+const TABS = ['Overview', 'Registrations', 'Attendance', 'Communities', 'Broadcast']
 
 export default function Admin() {
   const [token, setToken] = useState(() => sessionStorage.getItem('yaya65_admin_token') || '')
@@ -61,6 +62,7 @@ export default function Admin() {
         {tab === 'Registrations' && <AdminRegistrations token={token} onExpired={handleLogout} />}
         {tab === 'Attendance' && <AdminAttendance token={token} onExpired={handleLogout} />}
         {tab === 'Communities' && <AdminFamilies token={token} onExpired={handleLogout} />}
+        {tab === 'Broadcast' && <AdminBroadcast token={token} onExpired={handleLogout} />}
       </main>
     </div>
   )
